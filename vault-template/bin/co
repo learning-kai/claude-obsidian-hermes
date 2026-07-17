@@ -1,0 +1,68 @@
+#!/usr/bin/env bash
+# co — claude-obsidian Hermes CLI (parity helpers for upstream slash commands)
+set -euo pipefail
+VAULT="${CLAUDE_OBSIDIAN_VAULT:-/home/admin/claude-obsidian-vault}"
+PORT="${CLAUDE_OBSIDIAN_PORT:-/home/admin/claude-obsidian-hermes}"
+cd "$VAULT"
+cmd="${1:-help}"; shift || true
+case "$cmd" in
+  help|-h|--help)
+    cat <<H
+claude-obsidian Hermes CLI
+  co scaffold          ensure vault structure
+  co ingest <file>     ingest local file into .raw + source page
+  co query <text>      retrieve top chunks (BM25)
+  co lint              write lint report
+  co save <title>      save stdin/arg note into wiki/questions
+  co fold              extractive log fold
+  co mode [get|set]    methodology mode
+  co retrieve <q>      alias of query
+  co canvas            ensure main.canvas exists
+  co defuddle <url>    clean URL to markdown (fallback if no defuddle-cli)
+  co status            print port/vault health
+H
+    ;;
+  scaffold)
+    mkdir -p .raw wiki/{sources,entities,concepts,domains,comparisons,questions,meta,canvases,folds,references,mocs,notes,projects,areas,resources,archives} _templates .vault-meta/locks Inbox scripts
+    echo "scaffold ok: $VAULT"
+    ;;
+  ingest)
+    file="${1:?file required}"
+    python3 "$PORT/bin/co_ingest.py" --vault "$VAULT" --source "$file" ${2:+--title "$2"}
+    ;;
+  query|retrieve)
+    q="$*"; [[ -n "$q" ]] || { echo "usage: co query <text>" >&2; exit 2; }
+    python3 scripts/retrieve.py "$q" --top 5
+    ;;
+  lint)
+    python3 "$PORT/bin/co_lint.py" --vault "$VAULT"
+    ;;
+  save)
+    title="${1:-session-note}"
+    python3 "$PORT/bin/co_save.py" --vault "$VAULT" --title "$title"
+    ;;
+  fold)
+    python3 "$PORT/bin/co_fold.py" --vault "$VAULT"
+    ;;
+  mode)
+    sub="${1:-get}"; shift || true
+    case "$sub" in
+      get) python3 scripts/wiki-mode.py get ;;
+      set) python3 scripts/wiki-mode.py set "${1:?mode}" ;;
+      route) python3 scripts/wiki-mode.py route "${1:?type}" "${2:?name}" ;;
+      *) python3 scripts/wiki-mode.py get ;;
+    esac
+    ;;
+  canvas)
+    python3 "$PORT/bin/co_canvas.py" --vault "$VAULT"
+    ;;
+  defuddle)
+    url="${1:?url}"
+    python3 "$PORT/bin/co_defuddle.py" "$url"
+    ;;
+  status)
+    python3 "$PORT/bin/co_status.py" --vault "$VAULT" --port "$PORT"
+    ;;
+  *)
+    echo "unknown command: $cmd" >&2; exit 2 ;;
+esac

@@ -1,0 +1,104 @@
+#!/usr/bin/env bash
+set -euo pipefail
+VAULT="${CLAUDE_OBSIDIAN_VAULT:-/home/admin/claude-obsidian-vault}"
+PORT="${CLAUDE_OBSIDIAN_PORT:-/home/admin/claude-obsidian-hermes}"
+cd "$VAULT"
+cmd="${1:-help}"; shift || true
+case "$cmd" in
+  help|-h|--help)
+    cat <<'H'
+claude-obsidian Hermes CLI
+  co scaffold
+  co ingest <file> [title]
+  co ingest-url <url> [title]
+  co query <text>
+  co lint
+  co save <title>          # body from stdin if piped
+  co fold
+  co mode [get|set <mode>|route <type> <name>]
+  co retrieve <text>
+  co canvas
+  co defuddle <url>
+  co status
+  co address               # allocate-address
+  co reindex
+  co doctor
+  co mirror
+  co boundary              # boundary-score --json --top 10
+H
+    ;;
+  scaffold)
+    mkdir -p .raw wiki/{sources,entities,concepts,domains,comparisons,questions,meta,canvases,folds,references,mocs,notes,projects,areas,resources,archives} _templates .vault-meta/locks Inbox scripts
+    echo "scaffold ok: $VAULT"
+    ;;
+  ingest-url)
+    url="${1:?url required}"
+    title="${2:-}"
+    tmp=$(mktemp /tmp/co-url-XXXX.md)
+    python3 "$PORT/bin/co_defuddle.py" "$url" > "$tmp"
+    if [[ -n "$title" ]]; then
+      python3 "$PORT/bin/co_ingest.py" --vault "$VAULT" --source "$tmp" --title "$title"
+    else
+      python3 "$PORT/bin/co_ingest.py" --vault "$VAULT" --source "$tmp"
+    fi
+    rm -f "$tmp"
+    ;;
+  ingest)
+    file="${1:?file required}"; title="${2:-}"
+    if [[ -n "$title" ]]; then
+      python3 "$PORT/bin/co_ingest.py" --vault "$VAULT" --source "$file" --title "$title"
+    else
+      python3 "$PORT/bin/co_ingest.py" --vault "$VAULT" --source "$file"
+    fi
+    ;;
+  query|retrieve)
+    q="$*"; [[ -n "$q" ]] || { echo "usage: co query <text>" >&2; exit 2; }
+    python3 scripts/retrieve.py "$q" --top 5
+    ;;
+  lint)
+    python3 "$PORT/bin/co_lint.py" --vault "$VAULT"
+    ;;
+  save)
+    title="${1:-session-note}"
+    python3 "$PORT/bin/co_save.py" --vault "$VAULT" --title "$title"
+    ;;
+  fold)
+    python3 "$PORT/bin/co_fold.py" --vault "$VAULT"
+    ;;
+  mode)
+    sub="${1:-get}"; shift || true
+    case "$sub" in
+      get) python3 scripts/wiki-mode.py get ;;
+      set) python3 scripts/wiki-mode.py set "${1:?mode}" ;;
+      route) python3 scripts/wiki-mode.py route "${1:?type}" "${2:?name}" ;;
+      *) python3 scripts/wiki-mode.py get ;;
+    esac
+    ;;
+  canvas)
+    python3 "$PORT/bin/co_canvas.py" --vault "$VAULT"
+    ;;
+  defuddle)
+    url="${1:?url}"
+    python3 "$PORT/bin/co_defuddle.py" "$url"
+    ;;
+  reindex)
+    bash bin/setup-retrieve.sh --no-llm
+    ;;
+  mirror)
+    bash "$PORT/bin/sync_obsidian_mirror.sh"
+    ;;
+  doctor)
+    python3 "$PORT/bin/co_doctor.py" --vault "$VAULT" --port "$PORT"
+    ;;
+  status)
+    python3 "$PORT/bin/co_status.py" --vault "$VAULT" --port "$PORT"
+    ;;
+  address)
+    bash scripts/allocate-address.sh
+    ;;
+  boundary)
+    python3 scripts/boundary-score.py --json --top 10
+    ;;
+  *)
+    echo "unknown command: $cmd" >&2; exit 2 ;;
+esac

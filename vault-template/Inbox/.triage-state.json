@@ -1,0 +1,12 @@
+{
+  "version": 1,
+  "processed": {
+    "inbox-sample-note.md": {
+      "sha256": "32d27d4ac1922eb9387edc132b8ec8c684588d39f77c11c12124134631a1e168",
+      "status": "ingested",
+      "at": "2026-07-17T00:21:49",
+      "raw": ".raw/2026-07-17-inbox-inbox-sample-note.md"
+    }
+  },
+  "last_run": "2026-07-17T08:20:00"
+}

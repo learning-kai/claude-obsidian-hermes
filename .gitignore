@@ -1,0 +1,11 @@
+__pycache__/
+*.pyc
+.vault-meta/chunks/
+.vault-meta/bm25/
+.vault-meta/locks/
+*.tgz
+.env
+.DS_Store
+vault-live/
+.task-decomposer/
+upstream/

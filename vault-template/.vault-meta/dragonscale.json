@@ -1,0 +1,10 @@
+{
+  "enabled": true,
+  "mechanisms": {
+    "fold": true,
+    "addresses": true,
+    "semantic_tiling": false,
+    "boundary_score": true
+  },
+  "setup_date": "2026-07-17"
+}

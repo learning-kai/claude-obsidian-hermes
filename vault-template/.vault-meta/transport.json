@@ -1,0 +1,11 @@
+{
+  "preferred": "filesystem",
+  "fallback_chain": [
+    "filesystem"
+  ],
+  "available": {
+    "filesystem": {
+      "present": true
+    }
+  }
+}

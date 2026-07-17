@@ -1,0 +1,12 @@
+filters:
+  and:
+    - 'file.path.startsWith("wiki/")'
+formulas: {}
+properties: {}
+summaries: {}
+views:
+  - type: table
+    name: Wiki pages
+    order:
+      - file.name
+      - file.path

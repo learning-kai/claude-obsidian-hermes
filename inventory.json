@@ -1,0 +1,41 @@
+{
+  "date": "2026-07-17",
+  "upstream_rev": "cb93ff6d82f9c35a08bf6010e7fac36dfddc827b",
+  "skills_upstream": [
+    "autoresearch",
+    "canvas",
+    "defuddle",
+    "obsidian-bases",
+    "obsidian-markdown",
+    "save",
+    "think",
+    "wiki",
+    "wiki-cli",
+    "wiki-fold",
+    "wiki-ingest",
+    "wiki-lint",
+    "wiki-mode",
+    "wiki-query",
+    "wiki-retrieve"
+  ],
+  "skills_installed": [
+    "claude-obsidian",
+    "claude-obsidian-autoresearch",
+    "claude-obsidian-canvas",
+    "claude-obsidian-defuddle",
+    "claude-obsidian-obsidian-bases",
+    "claude-obsidian-obsidian-markdown",
+    "claude-obsidian-save",
+    "claude-obsidian-think",
+    "claude-obsidian-wiki",
+    "claude-obsidian-wiki-cli",
+    "claude-obsidian-wiki-fold",
+    "claude-obsidian-wiki-ingest",
+    "claude-obsidian-wiki-lint",
+    "claude-obsidian-wiki-mode",
+    "claude-obsidian-wiki-query",
+    "claude-obsidian-wiki-retrieve"
+  ],
+  "vault": "/home/admin/claude-obsidian-vault",
+  "port": "/home/admin/claude-obsidian-hermes"
+}
